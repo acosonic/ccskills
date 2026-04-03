@@ -11,6 +11,7 @@ A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sl
 | [cakephp2-security-analysis.md](cakephp2-security-analysis.md) | Comprehensive security audit for CakePHP 2.x applications |
 | [omv.md](omv.md) | Manages an OpenMediaVault server via SSH |
 | [wayland-detect.md](wayland-detect.md) | Auto-detects Wayland sessions for Lazarus/Qt5 applications |
+| [qt5-to-qt6-wayland.md](qt5-to-qt6-wayland.md) | Qt5 to Qt6 migration with native Wayland support |
 
 ## Installation
 
@@ -24,4 +25,5 @@ Copy any `.md` skill file to `~/.claude/commands/` and invoke it with `/<skill-n
 /cakephp2-security-analysis
 /omv user@server-ip
 /wayland-detect
+/qt5-to-qt6-wayland
 ```
