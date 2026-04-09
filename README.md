@@ -12,6 +12,7 @@ A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sl
 | [omv.md](omv.md) | Manages an OpenMediaVault server via SSH |
 | [wayland-detect.md](wayland-detect.md) | Auto-detects Wayland sessions for Lazarus/Qt5 applications |
 | [qt5-to-qt6-wayland.md](qt5-to-qt6-wayland.md) | Qt5 to Qt6 migration with native Wayland support |
+| [grub-hidpi-font.md](grub-hidpi-font.md) | Fix unreadable GRUB menu font on HiDPI/4K displays |
 
 ## Installation
 
@@ -26,4 +27,5 @@ Copy any `.md` skill file to `~/.claude/commands/` and invoke it with `/<skill-n
 /omv user@server-ip
 /wayland-detect
 /qt5-to-qt6-wayland
+/grub-hidpi-font
 ```
