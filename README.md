@@ -13,6 +13,7 @@ A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sl
 | [wayland-detect.md](wayland-detect.md) | Auto-detects Wayland sessions for Lazarus/Qt5 applications |
 | [qt5-to-qt6-wayland.md](qt5-to-qt6-wayland.md) | Qt5 to Qt6 migration with native Wayland support |
 | [grub-hidpi-font.md](grub-hidpi-font.md) | Fix unreadable GRUB menu font on HiDPI/4K displays |
+| [server-audit.md](server-audit.md) | Comprehensive server security audit after suspected compromise or spam attack |
 
 ## Installation
 
@@ -28,4 +29,5 @@ Copy any `.md` skill file to `~/.claude/commands/` and invoke it with `/<skill-n
 /wayland-detect
 /qt5-to-qt6-wayland
 /grub-hidpi-font
+/server-audit user@server-ip
 ```
