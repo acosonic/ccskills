@@ -15,6 +15,14 @@ A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sl
 | [grub-hidpi-font.md](grub-hidpi-font.md) | Fix unreadable GRUB menu font on HiDPI/4K displays |
 | [server-audit.md](server-audit.md) | Comprehensive server security audit after suspected compromise or spam attack |
 
+## References
+
+Patterns and best practices (not slash commands — used as context by Claude when relevant):
+
+| Reference | Description |
+|---|---|
+| [references/crawler-tmp-cleanup.md](references/crawler-tmp-cleanup.md) | Prevent /tmp bloat with Playwright/Selenium/Camoufox crawlers |
+
 ## Installation
 
 Copy any `.md` skill file to `~/.claude/commands/` and invoke it with `/<skill-name>` in Claude Code.
