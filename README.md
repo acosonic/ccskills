@@ -14,6 +14,7 @@ A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sl
 | [qt5-to-qt6-wayland.md](qt5-to-qt6-wayland.md) | Qt5 to Qt6 migration with native Wayland support |
 | [grub-hidpi-font.md](grub-hidpi-font.md) | Fix unreadable GRUB menu font on HiDPI/4K displays |
 | [server-audit.md](server-audit.md) | Comprehensive server security audit after suspected compromise or spam attack |
+| [vmware-esxi.md](vmware-esxi.md) | Manage VMware ESXi host over SSH — VM lifecycle, datastores, ghettoVCB backups, NVMe/cloud-init recovery |
 
 ## References
 
@@ -38,4 +39,5 @@ Copy any `.md` skill file to `~/.claude/commands/` and invoke it with `/<skill-n
 /qt5-to-qt6-wayland
 /grub-hidpi-font
 /server-audit user@server-ip
+/vmware-esxi status
 ```
