@@ -15,6 +15,7 @@ A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sl
 | [grub-hidpi-font.md](grub-hidpi-font.md) | Fix unreadable GRUB menu font on HiDPI/4K displays |
 | [server-audit.md](server-audit.md) | Comprehensive server security audit after suspected compromise or spam attack |
 | [vmware-esxi.md](vmware-esxi.md) | Manage VMware ESXi host over SSH — VM lifecycle, datastores, ghettoVCB backups, NVMe/cloud-init recovery |
+| [corp-webapp/](corp-webapp/SKILL.md) | House standard for internal Laravel web apps: ready starter with shadcn-style Bootstrap theme (light/dark, generic "Generic Corp" branding), Active Directory login + AD user import, mandatory driver.js tutorial, modals/side sheets, sortable tables, CARTO maps, Docker + Caddy https |
 
 ## References
 
@@ -27,6 +28,14 @@ Patterns and best practices (not slash commands — used as context by Claude wh
 ## Installation
 
 Copy any `.md` skill file to `~/.claude/commands/` and invoke it with `/<skill-name>` in Claude Code.
+
+Folder skills (with `SKILL.md`, scripts and templates, e.g. `corp-webapp/`) go to `~/.claude/skills/`:
+
+```bash
+cp -r corp-webapp ~/.claude/skills/
+```
+
+Claude Code picks them up automatically when the task matches the skill description (or call `/corp-webapp`).
 
 ## Usage
 
