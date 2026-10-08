@@ -15,7 +15,7 @@ A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sl
 | [grub-hidpi-font.md](grub-hidpi-font.md) | Fix unreadable GRUB menu font on HiDPI/4K displays |
 | [server-audit.md](server-audit.md) | Comprehensive server security audit after suspected compromise or spam attack |
 | [vmware-esxi.md](vmware-esxi.md) | Manage VMware ESXi host over SSH — VM lifecycle, datastores, ghettoVCB backups, NVMe/cloud-init recovery |
-| [corp-webapp/](corp-webapp/SKILL.md) | House standard for internal Laravel web apps: ready starter with shadcn-style Bootstrap theme (light/dark, generic "Generic Corp" branding), Active Directory login + AD user import, mandatory driver.js tutorial, modals/side sheets, sortable tables, CARTO maps, Docker + Caddy https |
+| [corp-webapp/](corp-webapp/SKILL.md) | House standard for internal Laravel web apps: ready starter with shadcn-style Bootstrap theme (light/dark, generic "Generic Corp" branding), Active Directory login + AD user import, mandatory driver.js tutorial, modals/side sheets, sortable tables, collapsible cards, CARTO maps, Docker + Caddy https. Patterns: preview for every file type (.doc → PDF via LibreOffice, Outlook .msg and ZIP in pure PHP), in-app approval/signature instead of "I agree" e-mails, admin SMTP settings, Word documents filled from the organisation's own templates |
 
 ## References
 

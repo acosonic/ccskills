@@ -570,3 +570,11 @@ table.table-sort .sort-ind { font-size: .7em; color: var(--app-brand); }
 .dash-name > a, .dash-name > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dash-stat-value { white-space: nowrap; }
 .dash-stat-sub, .dash-stat-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Collapsible cards (.sklopi-dugme in .card-header, cookie sklop_<key> — app-ui.js) */
+.card:has(> .card-header .sklopi-dugme) > .card-header { cursor: pointer; }
+.card.sklopljena > :not(.card-header) { display: none !important; }
+.card.sklopljena > .card-header { border-bottom: 0; }
+.sklopi-dugme .bi { display: inline-block; transition: transform .15s; }
+.card.sklopljena .sklopi-dugme .bi { transform: rotate(180deg); }
+

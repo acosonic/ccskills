@@ -91,6 +91,18 @@ najbolje u kopiji ovog skill-a):
 - **Detalj zapisa u naslovu nosi zapis** („2.39 · Predmet…"), ne „Detalj …".
 - **Po slici (mockup) — pravi podaci, bez praznih dugmadi**; razlike se kažu na kraju.
 - Pre većeg redizajna: commit + git tag trenutnog izgleda, da korisnik može da se vrati.
+- **Svaki fajl mora da ima pregled**: PDF, slike, DOCX, XLS(X), tekst u pregledaču; stari Word
+  (.doc/.rtf/.odt) → PDF preko LibreOffice-a u kontejneru; Outlook .msg → zaglavlje, tekst i prilozi;
+  ZIP → lista fajlova (prilog/stavka se otvara u istom prozoru). Samo rar/7z su „Preuzmi"
+  (`references/file-preview.md` 7–9).
+- **Svako AJAX čekanje ima spinner sa porukom šta se radi** (+ brojač sekundi) — `cekanje()` u `app-ui.js`
+  (`references/ui-patterns.md` 8).
+- **Veće kartice na detalju su sklopive**, stanje se pamti (`references/ui-patterns.md` 6).
+- **Filter godine prati otvoreni zapis** — detalj postavlja godinu zapisa (`references/ui-patterns.md` 7).
+- **„Saglasan" se ne traži mejlom** — zahtev za saglasnost/potpis u aplikaciji (dokumenta + dugmad + evidencija),
+  mejl nosi samo link; SMTP podešava administrator u aplikaciji sa probnim slanjem (`references/ui-patterns.md` 9–10).
+- **Dokumenti na obrascu službe** (zahtev, rešenje, izjava) prave se iz pravog Word dokumenta iz arhive kao
+  šablona sa poljima `${…}`, sa predlogom iz podataka (`references/ui-patterns.md` 11).
 
 ## Režim 2 — postojeća aplikacija
 
@@ -161,6 +173,14 @@ inače ime ne radi u internoj mreži).
   Skriven overlay mora biti `display:none` (ili `pointer-events:none`); proveri
   `document.elementFromPoint` u uglu posle učitavanja.
 
+- **Ponovno kreiranje kontejnera briše ručne izmene** (npr. pri dodavanju LibreOffice-a u sliku): `.env`
+  ubačen `docker cp`-om i mreža ka drugom servisu povezana `docker network connect` nisu bili u
+  `docker-compose.yml`. Pre `up -d --build` proveri `docker inspect` (mreže, mountovi) i upiši ih u compose
+  (`./.env:…/.env:ro`, `networks: <ime>: external: true`); posle proveri vezu sa drugim servisom i da je baza
+  i dalje u volumenu. Rezervna kopija baze pre svake izmene podataka.
+- **Ćirilica u regex-u uvek sa `/u`** — `trim($x, ' -–')` (višebajtni znak u listi) seče bajtove slova na kraju
+  teksta (npr. „надзо?"); `json_encode` posle toga vraća false i podatak se tiho izgubi.
+
 ## Podešavanja organizacije (popuni za svoju sredinu)
 
 | Vrednost | Primer u starteru | Gde |
@@ -182,5 +202,7 @@ Ako neka postojeća aplikacija drži AD lozinku u fajlu pod git-om, podseti kori
 scripts/new-app.sh       nova aplikacija: Laravel + starter + .env + docker-compose
 scripts/ui-smoke.mjs     provera u pregledaču (headless Chrome, bez menjanja podataka; npm install u scripts/)
 starter/laravel/         skelet (brend, config-driven meni, modali, vodič, sortiranje; AD, korisnici, tema, Docker)
+assets/php/msg.php       čitač Outlook .msg (OLE/CFB + MAPI) u čistom PHP-u, bez biblioteka
+assets/php/mail.php      SMTP klijent (STARTTLS/SSL, AUTH) + HTML šablon mejla, bez biblioteka (za čist PHP)
 references/              ad-login, tour, theme, overlays, maps, file-preview, ui-patterns
 ```

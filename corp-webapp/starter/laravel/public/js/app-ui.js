@@ -356,6 +356,35 @@
         window.location.href = sheetEl.dataset.url;
     });
 
+    // AJAX spinner while something loads or is generated: spinner + what is happening + seconds counter
+    // (after 2 s; stops by itself once the element's content is replaced). Never an empty area or bare spinner.
+    window.cekanje = function (el, poruka) {
+        var d = document.createElement('div'); d.textContent = poruka || (T.loading || 'Učitavam…');
+        el.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center gap-2 text-muted cekanje" style="min-height:40vh">'
+            + '<div class="spinner-border text-primary"></div><div class="small">' + d.innerHTML + '</div>'
+            + '<div class="small opacity-75 cekanje-sek"></div></div>';
+        var box = el.querySelector('.cekanje'), t0 = Date.now();
+        var iv = setInterval(function () {
+            if (!box.isConnected) return clearInterval(iv);
+            var s = Math.round((Date.now() - t0) / 1000);
+            if (s >= 2) box.querySelector('.cekanje-sek').textContent = s + ' s';
+        }, 1000);
+    };
+
+    // Collapsible cards: header contains .sklopi-dugme[data-sklopi=key]; clicking the arrow or an empty part of the
+    // header toggles .sklopljena on the card. State goes to cookie sklop_<key> so the server renders it collapsed
+    // (also when AJAX replaces the section). CSS in theme.css.
+    document.addEventListener('click', function (e) {
+        var head = e.target.closest && e.target.closest('.card-header');
+        if (!head) return;
+        var btn = head.querySelector('.sklopi-dugme');
+        if (!btn) return;
+        if (e.target.closest('a, button, input, select, label, [data-bs-toggle]') && !e.target.closest('.sklopi-dugme')) return;
+        var card = head.closest('.card'), on = !card.classList.contains('sklopljena');
+        card.classList.toggle('sklopljena', on);
+        document.cookie = 'sklop_' + btn.dataset.sklopi + '=' + (on ? '1' : '0') + ';path=/;max-age=31536000;SameSite=Lax';
+    });
+
     // Clickable names (<span class="klik-naziv" role="button" tabindex="0">): Enter/Space act like a click.
     document.addEventListener('keydown', function (e) {
         if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.klik-naziv[role="button"]')) {

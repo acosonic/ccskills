@@ -14,6 +14,12 @@ Skript je već u starteru: `public/js/lightbox.js`, učitan u `layouts/app.blade
 |---|---|
 | **Više priloga jednog zapisa** (ugovor, predmet, nabavka) — korisnik ih pregleda redom i posle nešto uradi (poveži, završi, odobri) | **Lightbox sa listom** (odeljak 6) — ovo korisnik preferira |
 | Pojedinačni fajl ili galerija slika bez akcije | `lightbox.js` overlay sa ‹ › (odeljci 1–5) |
+| **Svi fajlovi zapisa po folderima** (arhiva predmeta, isti spisak kao mrežni disk/WebDAV) | **Lightbox stabla** (odeljak 9) — folderi + pretraga levo, pregled desno |
+
+Svaki format mora imati pregled, ne samo PDF/DOCX: stari Word **.doc/.rtf/.odt → PDF preko
+LibreOffice-a** (odeljak 7), Outlook **.msg** se čita u PHP-u (odeljak 8), **ZIP** kao lista fajlova
+(odeljak 8), `.txt/.csv` kao tekst. „Preuzmi" je poslednja opcija (rar, 7z…). Svako čekanje ima
+spinner sa porukom (odeljak 7).
 
 U oba slučaja **naziv fajla je okidač**, ne samo ikonica 👁 — vidi „Klikabilni nazivi" u `SKILL.md`.
 
@@ -32,7 +38,7 @@ U oba slučaja **naziv fajla je okidač**, ne samo ikonica 👁 — vidi „Klik
 - **pdf / image** — lightbox koristi `href` (iframe za PDF, `<img>` za sliku).
 - **office** — lightbox učitava `data-preview` (HTML render) u `<iframe sandbox>`.
 - Tipovi koje `data-preview` pokriva: `docx, odt` (pandoc) i `xls, xlsx, ods` (PhpSpreadsheet).
-  Za `doc, ppt, pptx` i sl. ne stavljaj `data-preview` → lightbox ponudi „otvori/preuzmi".
+  Za `doc, rtf` koristi konverziju u PDF preko LibreOffice-a (odeljak 7) — ne ostavljaj samo „preuzmi".
 
 ## 2. Backend — dve rute
 
@@ -182,3 +188,85 @@ Office tipove prikaži preko `data-preview` HTML-a u `iframe sandbox` kao u odel
 - Aktivna stavka `list-group` je u boji brenda — sivi tekst u njoj (`.text-muted`) posvetli, inače se ne čita.
 - JSON ruta i proxy imaju ista prava kao stranica koja ih koristi (ako detalj vide i radnici,
   samo prijava, ne uloga službenika).
+
+## 7. Stari Office (.doc, .rtf, .odt) → PDF preko LibreOffice-a
+
+Korisnici su izričito tražili da se i `.doc` prikazuje („zašto .doc neće a .docx hoće"). `.docx` je ZIP+XML
+i `docx-preview` ga crta u pregledaču; `.doc` je binarni OLE format koji nijedna JS biblioteka ne čita
+pouzdano → **server ga pretvara u PDF**, kešira, a pregled prikazuje PDF. U stvarnoj arhivi predmeta
+`.doc` i `.msg` su stotine fajlova — nije retkost.
+
+Ruta: `GET /preview?f=<fajl>&kao=pdf` (u čistom PHP-u `pregled.php`), JS `window.prikaziFajl(el, url, ime)`
+bira način po ekstenziji (PDF, slika, DOCX, XLS(X), tekst, ZIP, .msg, a za .doc/.rtf/.odt — ova ruta).
+
+```dockerfile
+# Poseban sloj (≈ +500 MB slike). Fontovi: ćirilica + metrički isti kao Calibri/Cambria/Arial/Times
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libreoffice-writer-nogui fonts-dejavu-core fonts-liberation2 \
+        fonts-crosextra-carlito fonts-crosextra-caladea \
+    && rm -rf /var/lib/apt/lists/*
+```
+
+```php
+session_write_close();                                   // dugo pretvaranje ne sme da zaključa sesiju
+$kes = "$uploads/.pregled/" . sha1($fajl . '#' . filemtime($putanja)) . '.pdf';   // keš u trajnom volumenu
+if (!is_file($kes)) {
+    $brava = fopen(sys_get_temp_dir() . '/app-soffice.lock', 'c'); flock($brava, LOCK_EX);  // jedan soffice odjednom
+    if (!is_file($kes)) {                                // možda ga je napravio zahtev koji je čekao ispred
+        // kopija u privremeni folder pod imenom ulaz.<ext>, pa:
+        shell_exec('HOME=/tmp timeout 120 soffice --headless --norestore --nolockcheck'
+            . ' -env:UserInstallation=file:///tmp/app-lo-profil --convert-to pdf --outdir ' . escapeshellarg($tmp)
+            . ' ' . escapeshellarg("$tmp/ulaz.$ext") . ' 2>&1');
+        rename("$tmp/ulaz.pdf", $kes);
+    }
+    flock($brava, LOCK_UN);
+}
+header('Content-Type: application/pdf'); readfile($kes);
+```
+
+- **Brzina:** prvi put 1–5 s (hladan start LibreOffice-a), posle iz keša odmah.
+- **Zamke:** `www-data` nema upisiv `HOME` → `HOME=/tmp`; dva `soffice` procesa sa istim profilom se
+  sudaraju → `flock` + zaseban `UserInstallation`; bez `timeout` zaglavljen dokument drži PHP proces.
+- Ista ruta prima i prilog iz `.msg` poruke i fajl iz ZIP-a (`&prilog=<i>`, `&zip=<i>`) — `.doc` prosleđen
+  mejlom ili spakovan u ponudu se takođe pretvara.
+- **AJAX spinner sa porukom** za svako čekanje: `cekanje(el, 'Pretvaram .doc u PDF — prvi put može da
+  potraje nekoliko sekundi…')` — spinner + tekst šta se radi + brojač sekundi posle 2 s (stane sam kad se
+  sadržaj zameni; `cekanje()` je u `app-ui.js`). Bez praznog spinera.
+- Brzi klik na drugi fajl: brojač `body._tok` — odgovor starog zahteva se odbacuje.
+- Ako se Docker slika gradi ponovo zbog LibreOffice-a, vidi zamku „Ponovno kreiranje kontejnera" u `SKILL.md`.
+
+## 8. Outlook .msg i ZIP — u čistom PHP-u
+
+**`.msg`** — `assets/php/msg.php`, bez biblioteka i ekstenzija:
+- `CfbFajl` čita OLE compound file (sektori, DIFAT/FAT, mini stream, stablo direktorijuma);
+- `msgProcitaj($putanja)` → `naslov, od, za, cc, datum, html, tekst, prilozi[{i, ime, mime, vel, cid, skriven, ugradjena}]`;
+- `msgPrilog($putanja, $i)` → `{ime, mime, sadrzaj}` jednog priloga.
+
+MAPI svojstva: `__substg1.0_PPPPTTTT` (TTTT `001F` UTF-16, `001E` ANSI po `PR_INTERNET_CPID 3FDE` /
+`PR_MESSAGE_CODEPAGE 3FFD`, inače Windows-1250; `0102` binarno), fiksna u `__properties_version1.0`
+(zaglavlje 32 B za poruku, 8 B za prilog; 16 B po svojstvu; datum `0039/0E06` je FILETIME).
+Naslov `0037`, pošiljalac `0C1A` + `5D01` (Exchange DN „/O=…" nije adresa), Za `0E04`, Cc `0E03`,
+tekst `1000`, HTML `1013`; prilog: ime `3707/3704/3001`, sadržaj `3701 0102`, `3701 000D` = ugrađena poruka
+(nema bajtove), `3712` content-id, `7FFE` skriven (slike u potpisu).
+
+Prikaz: zaglavlje (Od/Za/Cc/Datum), telo — HTML u `<iframe sandbox="allow-same-origin allow-popups" srcdoc>`
+(bez skripti; `cid:` zamenjen URL-om priloga) ili `<pre>` tekst; prilozi kao dugmad → **prilog se otvara u
+istom prozoru** (`prikaziFajl` rekurzivno) sa „← Poruka"; skriveni prilozi sa `cid` se ne nude.
+Outlook često čuva samo RTF + tekst (bez HTML-a) — tekst je dovoljan; iz teksta ukloni oznake slika iz
+potpisa (`[cid:image001.jpg@…]`).
+
+**ZIP** (npr. ponude se šalju kao `.zip`): `?kao=zip` → JSON lista stavki (`ZipArchive`, imena čitaj sa
+`FL_ENC_RAW` i pretvori iz CP852/Windows-1250 ako nisu UTF-8 — Windows arhive), `&zip=<redni broj>` → stavka
+inline. Lista u pregledu, klik otvara fajl u istom prozoru sa „← Arhiva". Stavka se bira po indeksu, ne po
+imenu (imena su često u pogrešnom kodiranju). RAR/7z — samo „Preuzmi".
+
+## 9. Lightbox stabla fajlova zapisa (isti spisak kao mrežni disk)
+
+Jedna funkcija vraća sve fajlove zapisa kao `[relativna putanja => fajl]` (podfolderi arhive, priloženi
+dokumenti, generisani Word) i koriste je **i** WebDAV/mrežni disk **i** lightbox — jedan izvor istine.
+Lightbox: levo folderi (sticky zaglavlja) + pretraga, desno `prikaziFajl` sa Štampaj / Otvori u novom tabu /
+Preuzmi, ↑/↓ prelazi na sledeći fajl. Okidači: dugme „Fajlovi" u zaglavlju detalja i naziv svakog fajla
+(`data-fajlovi-lightbox data-pocetni="dok:<id>"`). Podaci su JSON u stranici (bez dodatnog zahteva).
+Ista komponenta služi za svaku listu fajlova (npr. revizije plana) — prosledi naslov i stavke.
+Aktivna stavka: `.list-group-item` van `.list-group` nema boje aktivne stavke — zadaj ih eksplicitno.
+
