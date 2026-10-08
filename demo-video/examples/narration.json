@@ -1,0 +1,10 @@
+{
+ "panel-en": {
+  "about": "This is a platform for nutritionists. In one place you manage clients, build meal plans, schedule appointments and bill for your service. Every client gets an app on their phone, under your name.",
+  "intro": "In the next two minutes you will see three things: how clients are managed, how a meal plan is built, and how you get paid.",
+  "clients": "The client list shows who is active and how long access is paid for.",
+  "plan": "A meal plan is a table of days and meals. Each meal can be replaced, removed, or added.",
+  "invoices": "You issue invoices from the panel. The client sees them in the app.",
+  "outro": "To recap. You have seen how clients are managed, how a meal plan is built, and how invoices work. Thank you for watching."
+ }
+}
