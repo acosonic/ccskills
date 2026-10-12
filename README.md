@@ -17,6 +17,9 @@ A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sl
 | [vmware-esxi.md](vmware-esxi.md) | Manage VMware ESXi host over SSH — VM lifecycle, datastores, ghettoVCB backups, NVMe/cloud-init recovery |
 | [corp-webapp/](corp-webapp/SKILL.md) | House standard for internal Laravel web apps: ready starter with shadcn-style Bootstrap theme (light/dark, generic "Generic Corp" branding), Active Directory login + AD user import, mandatory driver.js tutorial, modals/side sheets, sortable tables, collapsible cards, CARTO maps, Docker + Caddy https. Patterns: preview for every file type (.doc → PDF via LibreOffice, Outlook .msg and ZIP in pure PHP), in-app approval/signature instead of "I agree" e-mails, admin SMTP settings, Word documents filled from the organisation's own templates |
 | [demo-video/](demo-video/SKILL.md) | Narrated demo video of a web app: Playwright walks through the real application, a text-to-speech narrator explains each scene, title cards open and close it (what it is, what you will see, recap), quiet music ducks under the voice. Scenes are paced to the voice clips; scripts for speech, music, mixing and for checking audio you cannot hear |
+| [mi-smart-clock-hass-kiosk.md](mi-smart-clock-hass-kiosk.md) | Convert Xiaomi Mi Smart Clock (X04G) into a Home Assistant kiosk — backup, bootloader unlock, LineageOS 20 GSI flash, Fully Kiosk + Cyrillic dashboard |
+| [lineageos-install.md](lineageos-install.md) | Generic LineageOS install playbook for any supported phone/tablet — pre-flight, bootloader unlock, recovery flash, ROM + GApps/microG sideload, common gotchas |
+| [web-credential-vault.md](web-credential-vault.md) | Playbook for client-side encrypted credential storage in PHP+JS: bcrypt auth, AES-256-GCM vault, PBKDF2, roles, audit log, global rekey, and the five pitfalls we hit in production |
 
 ## References
 
@@ -50,4 +53,7 @@ Claude Code picks them up automatically when the task matches the skill descript
 /grub-hidpi-font
 /server-audit user@server-ip
 /vmware-esxi status
+/mi-smart-clock-hass-kiosk
+/lineageos-install
+/web-credential-vault
 ```
