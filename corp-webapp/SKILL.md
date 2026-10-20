@@ -1,6 +1,6 @@
 ---
 name: corp-webapp
-description: House standard for internal company web applications — new apps are created from a ready Laravel starter that already has the house look (shadcn-style Bootstrap theme, sidebar, light/dark, organisation logo — "Generic Corp" placeholder), Active Directory login with local roles and AD user import, a mandatory driver.js onboarding tutorial, modals/side sheets without page reloads, sortable tables, dashboard cards, CARTO maps, https behind Caddy and Docker. Use this skill WHENEVER a new internal web app, tool, admin panel, evidencija, register or portal is created for the organisation (even if the user doesn't mention AD, theme or tutorial — they are required by default), and whenever an existing internal app should get the same look, AD/LDAP login ("prijava preko AD"), user import from Active Directory, a tutorial/vodič, dark mode or modals.
+description: House standard for internal company web applications — new apps are created from a ready Laravel starter that already has the house look (shadcn-style Bootstrap theme, sidebar, light/dark, organisation logo — "Generic Corp" placeholder), Active Directory login with local roles and AD user import, a mandatory driver.js onboarding tutorial, modals/side sheets without page reloads, sortable tables, dashboard cards, CARTO maps, https behind Caddy and Docker. Use this skill WHENEVER a new internal web app, tool, admin panel, evidencija, register or portal is created for the organisation (even if the user doesn't mention AD, theme or tutorial — they are required by default), and whenever an existing internal app should get the same look, AD/LDAP login ("prijava preko AD"), user import from Active Directory, a tutorial/vodič, dark mode or modals. Also use it to add an AI assistant / chatbot / „AI asistent" / „pitaj aplikaciju" to such an app — an agent (Claude + tools) that searches the app's data and documents with the user's permissions, proposes changes the user confirms with a button, and optionally a public website assistant that answers from the site's content — even if the user doesn't mention Claude, tools or agents.
 ---
 
 # corp-webapp — standard za interne web aplikacije
@@ -70,6 +70,19 @@ najbolje u kopiji ovog skill-a):
    `--app-ring`, `--bs-primary-*` u svetlom i tamnom bloku, i dve fiksne boje (`.brand-mark`, `.auth-aside`).
 4. Proveri kontrast: bela slova na `--app-brand` (login panel, primarna dugmad) i brend boja na tamnoj pozadini.
 
+## AI asistent (opcioni modul)
+
+Kad korisnik traži chatbota, AI asistenta, „pitaj aplikaciju" ili „asistenta za sajt":
+
+```bash
+~/.claude/skills/corp-webapp/scripts/add-ai-agent.sh ~/apps/<ime> [--site https://www.sajt.rs]
+```
+
+To je **agent**, ne „pogađanje": Claude sam poziva alate nad podacima aplikacije (pretraga, detalj, tekst dokumenta,
+statistika, read-only SQL) sa dozvolama korisnika, uživo pokazuje šta radi, odgovara sa tabelama i linkovima, a
+izmene samo **predlaže** — upisuju se tek na „Potvrdi". Varijanta `--site`: javni asistent iz sadržaja sajta.
+Posle ugradnje napiši alate aplikacije i prilagodi prompt — sve u `references/ai-agent.md`.
+
 ## Pravila interfejsa (korisnici su ih izričito tražili)
 
 - **Nazivi su klikabilni svuda, ne samo ikonica.** Naziv dokumenta, priloga, ugovora ili zapisa otvara
@@ -123,6 +136,7 @@ Isti rezultat, ali ručno i pažljivo, jer aplikacija već ima svoje korisnike, 
 | CARTO mape sa čitljivim nazivima i OSM rezervom | `references/maps.md` |
 | Pregled fajlova (PDF/slike lightbox, DOCX/XLSX → HTML) | `references/file-preview.md` |
 | Proces sa koracima (hibrid), kontrolna tabla, sortiranje tabela, naslov detalja | `references/ui-patterns.md` |
+| AI asistent (agent sa alatima, izmene uz potvrdu, javni asistent sajta) | `references/ai-agent.md` + `scripts/add-ai-agent.sh` |
 
 Čist PHP: tema i JavaScript su isti (`theme.css`, `app-ui.js`, `tour.js`, `lightbox.js`); AD logiku iz
 `LdapService` prepiši u helper — vidi `references/ad-login.md`.
