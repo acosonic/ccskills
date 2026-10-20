@@ -1,6 +1,6 @@
 ---
 name: demo-video
-description: Make a narrated demo video of a web application — a real browser walks through the app while a text-to-speech narrator explains it, with title cards and quiet background music. Use this whenever the user asks for a demo video, product walkthrough, screen recording, "snimi video", "demo snimak", a video with voice-over or narration, or wants voice or music added to a recording of their app, even if they only say "record how it works". Covers the script structure (say what it is, say what you will show, show it, recap), pacing scenes to the voice, mobile and desktop viewports, several languages, and checking audio you cannot hear.
+description: Make a narrated demo video of a web application — a real browser walks through the app while a text-to-speech narrator (Google Chirp 3 HD or OpenAI) explains it, with the company logo, title cards and quiet background music. Use this whenever the user asks for a demo video, product walkthrough, screen recording, "snimi video", "demo snimak", a video with voice-over or narration, or wants voice or music added to a recording of their app, even if they only say "record how it works". Covers the script structure (say what it is, say what you will show, show it, recap), pacing scenes to the voice, mobile and desktop viewports, several languages, and checking audio you cannot hear.
 ---
 
 # Narrated demo video of a web app
@@ -8,8 +8,9 @@ description: Make a narrated demo video of a web application — a real browser 
 A demo video here is a Playwright recording of the real application, a voice clip per scene, and a music bed, joined
 with ffmpeg. The scripts in `scripts/` do the mechanical parts; your work is the story, the scenario and the checks.
 
-Needs: Node with Playwright (Chromium), ffmpeg/ffprobe, Python 3 with numpy, and an `OPENAI_API_KEY` for speech.
-Take the key from the environment or the project's own config. Never print it, and never write it into a script.
+Needs: Node with Playwright (Chromium), ffmpeg/ffprobe, Python 3 with numpy, a speech key — `GOOGLE_TTS_API_KEY`
+(Google Cloud Text-to-Speech, the default) or `OPENAI_API_KEY` — and the company logo (section 4).
+Take the key from the environment or the project's own config (`.env`). Never print it, and never write it into a script.
 
 ## 1. Write the story before any code
 
@@ -38,20 +39,36 @@ Writing for a synthetic voice:
 
 ## 2. Choose the voice with the user
 
-You cannot hear the result, and voice is taste. Generate one sentence in several voices and let the user pick:
+You cannot hear the result, and voice is taste. Generate one sentence in several voices and let the user pick.
+
+**Default: Google Cloud TTS, Chirp 3 HD.** It speaks real Serbian (`sr-RS`, Cyrillic) and the user prefers it. A voice
+whose name starts with a locale (`sr-RS-…`) goes to Google, anything else to OpenAI. The house narrator for Serbian is
+**`sr-RS-Chirp3-HD-Fenrir`** (male); use it unless the user asks for another.
+
+```bash
+python3 scripts/tts.py --google-voices sr-RS                     # names and genders
+python3 scripts/tts.py --samples "Добро дошли. Ово је кратак приказ апликације." sr-RS-Chirp3-HD-Fenrir sr-RS-Chirp3-HD-Orus
+python3 scripts/tts.py panel-sr client-sr --voice sr-RS-Chirp3-HD-Fenrir
+```
+
+- Write Serbian narration in **Cyrillic**; the same spelling-for-the-ear rules as below apply.
+- Google takes no style instructions (`style.json` is ignored) and speaks faster than OpenAI: the same text is about
+  25% shorter, so a video recorded for another voice must be recorded again.
+- Price: about $30 per million characters after a monthly free tier of about a million; a whole video is a few
+  thousand characters, so it is normally free. The key needs only the Text-to-Speech API (restrict it to that).
+- Local models (Coqui VITS/XTTS) were tried for Serbian and rejected: one flat female voice, or foreign accent.
+
+**OpenAI** (`gpt-4o-mini-tts`, voices onyx, ash, echo, cedar, ballad, verse) follows a written manner in
+`voice/style.json` (copy `examples/style.json`): describe the voice, tone, pace and how sentences end, in the language
+being spoken.
 
 ```bash
 python3 scripts/tts.py --samples "Dobro došli. Ovo je kratak prikaz aplikacije." --lang sr onyx ash echo cedar ballad verse
+python3 scripts/tts.py panel-en --voice onyx
 ```
 
-The narrator's manner is in `voice/style.json` (copy `examples/style.json`): describe the voice, tone, pace and how
-sentences end, in the language being spoken. This matters more than the voice name. Then generate the clips:
-
-```bash
-python3 scripts/tts.py panel-sr client-sr client-en --voice onyx
-```
-
-This writes `voice/<set>/NN.mp3` and `durations.json`. Regenerate whenever the text changes, before recording.
+Either way this writes `voice/<set>/NN.mp3` and `durations.json`. Regenerate whenever the text or the voice changes,
+before recording. Keep the previous set (`cp -r voice/<set> voice/<set>-old`) if the user may want to go back.
 
 ## 3. Write the scenario
 
@@ -81,7 +98,24 @@ Make the recording repeatable:
 Languages: the narration, the title cards and the application on screen should be in the same language. If the app
 has no translation for part of it, say so to the user instead of quietly shipping English voice over foreign screens.
 
-## 4. Record, then mix
+## 4. The company logo — always
+
+Every video carries the logo of the company whose application it shows: large on every title card and as a small
+plate in the bottom-right corner for the whole video. Before recording, put two files in the project:
+
+- `logo/card.png` — light (white) version for the colored title cards; `start()` puts it on every `titleCard`
+  automatically (`logo: ''` on one card hides it, `start({ logo: 'other.png' })` uses another file);
+- `logo/corner.png` — the logo on a small white plate, readable over any screen; `mix.sh` overlays it
+  (6% of the video height, bottom right) and **refuses to mix without it** (`LOGO=0` only if the user says no logo).
+
+Take the logo from the application itself (its `assets/`, the login page, the favicon) or ask the user; do not draw
+one. The plate from the normal (dark-on-light) logo:
+`convert logo.png -resize x56 -background white -flatten -bordercolor white -border 10 logo/corner.png`;
+for the card, the white version of the logo if the app has one, else `convert logo.png -fill white -colorize 100 logo/card.png`
+(a single-color logo; check it). Check both in the contact sheet: the plate must not cover a button the
+narration talks about; if it does, scroll that element up a little in the scenario.
+
+## 5. Record, then mix
 
 ```bash
 node scenario.js                 # -> raw/<name>.webm and raw/<name>.cues
@@ -89,12 +123,12 @@ python3 scripts/music.py         # once: voice/music.mp3, a plain original bed w
 scripts/mix.sh <name>            # -> <name>.mp4   (MUSIC=0.3 for quieter music, MUSIC=0 for none)
 ```
 
-Recording and mixing are separate on purpose. A recording takes minutes; a mix takes seconds. A new music track or
-level needs only `mix.sh`. A new voice or new text changes clip lengths, so it needs a new recording.
+Recording and mixing are separate on purpose. A recording takes minutes; a mix takes seconds. A new music track,
+level or logo plate needs only `mix.sh` (the card logo is drawn while recording). A new voice or new text changes clip lengths, so it needs a new recording.
 
 If the user has a track they are allowed to use, put it at `voice/music.mp3`. Do not download music.
 
-## 5. Check what you can, and say what you cannot
+## 6. Check what you can, and say what you cannot
 
 You cannot listen to the video. Do these instead, and report them as what they are:
 
@@ -120,5 +154,9 @@ samples are so they can ask for changes.
 - **Video duration unknown.** Playwright's webm has no duration in its header; `mix.sh` measures it by decoding.
 - **A failed mix destroyed the take.** Never delete the raw recording as part of the mix step.
 - **Narration cut off at the end.** `finish()` waits for the last clip; do not close the context yourself.
+- **PDF shown blank.** Playwright's bundled headless Chromium has no PDF viewer, so a PDF in an iframe or tab is
+  an empty box in the video. Pass `channel: 'chrome'` to `start()` (installed Google Chrome renders PDFs headless).
 - **Voice over the wrong screen.** A scene was skipped but its `step` still ran, or `step` was called before the page
   had loaded.
+- **No logo in the video.** The company logo is part of every video (section 4); `mix.sh` now stops without
+  `logo/corner.png` instead of quietly mixing without it.

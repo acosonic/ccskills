@@ -4,10 +4,18 @@
 // then writes a cue line ("T <ms> <clip>") that mix.sh uses to place the voice clip. Scenes without narration are fine.
 const fs = require('fs'), path = require('path');
 
-exports.start = async function ({ name, viewport, mobile = false, locale = 'en-GB', dir = process.cwd(), playwright = 'playwright', gap = 500 }) {
+exports.start = async function ({ name, viewport, mobile = false, locale = 'en-GB', dir = process.cwd(), playwright = 'playwright', gap = 500, channel, logo }) {
   const { chromium } = require(playwright);
+  // Company logo on every title card: `logo` (file path or URL), else <dir>/logo/card.png (light version for the colored card)
+  const cardLogo = (() => {
+    const f = logo || path.join(dir, 'logo', 'card.png');
+    if (/^(https?:|data:)/.test(f)) return f;
+    if (!fs.existsSync(f)) { console.warn('WARNING: no company logo (' + f + ') — title cards will have none'); return ''; }
+    return 'data:image/' + (f.endsWith('.svg') ? 'svg+xml' : 'png') + ';base64,' + fs.readFileSync(f).toString('base64');
+  })();
   const durations = (() => { try { return JSON.parse(fs.readFileSync(path.join(dir, 'voice', name, 'durations.json'), 'utf8')); } catch (_) { return {}; } })();
-  const browser = await chromium.launch();
+  // channel: 'chrome' — installed Google Chrome; Playwright's headless Chromium shows PDFs (iframes, viewers) as blank
+  const browser = await chromium.launch(channel ? { channel } : {});
   const tmp = path.join(dir, 'raw', '.tmp-' + name);
   const ctx = await browser.newContext(Object.assign({ viewport, locale, recordVideo: { dir: tmp, size: viewport } },
     mobile ? { deviceScaleFactor: 2, isMobile: true, hasTouch: true } : { deviceScaleFactor: 1 }));
@@ -33,15 +41,17 @@ exports.start = async function ({ name, viewport, mobile = false, locale = 'en-G
     },
     // Type like a person, so the viewer can follow.
     async type(selector, text, delay = 35) { await page.click(selector); await page.type(selector, text, { delay }); },
-    // Full-screen title card: brand line, title, a lead line and up to four points. numbered=false gives bullets.
-    async titleCard({ color = '#234d3c', brand = '', title, lead = '', points = [], foot = '', numbered = true }) {
+    // Full-screen title card: company logo (from start(); logo: '' hides it, or another image URL / data: URI), brand line,
+    // title, a lead line and up to four points. numbered=false gives bullets.
+    async titleCard({ color = '#234d3c', brand = '', title, lead = '', points = [], foot = '', numbered = true, logo = cardLogo, logoHeight }) {
       const big = !mobile, esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
       await page.setContent('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
         + '<style>html,body{height:100%;margin:0}body{display:flex;flex-direction:column;justify-content:center;box-sizing:border-box;padding:0 9%;background:' + color + ';color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}'
         + 'small{font-size:' + (big ? 22 : 17) + 'px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}h1{font-size:' + (big ? 62 : 40) + 'px;line-height:1.1;margin:.25em 0 .7em}p{font-size:' + (big ? 26 : 20) + 'px;margin:0 0 .5em;opacity:.85}'
         + 'ol{margin:0;padding:0;list-style:none;counter-reset:n}li{counter-increment:n;display:flex;gap:.7em;align-items:baseline;font-size:' + (big ? 32 : 23) + 'px;line-height:1.3;margin:0 0 .65em}'
         + 'li::before{content:' + (numbered ? 'counter(n)' : "'•'") + ';flex:none;width:1.5em;height:1.5em;line-height:1.5em;border-radius:50%;background:#fff;color:' + color + ';text-align:center;font-weight:700;font-size:.8em}'
-        + 'footer{margin-top:1.4em;font-size:' + (big ? 24 : 19) + 'px;opacity:.85}</style>'
+        + 'footer{margin-top:1.4em;font-size:' + (big ? 24 : 19) + 'px;opacity:.85}.logo{align-self:flex-start;height:' + (logoHeight || (big ? 96 : 64)) + 'px;margin-bottom:' + (big ? 36 : 24) + 'px}</style>'
+        + (logo ? '<img class="logo" alt="" src="' + String(logo).replace(/"/g, '&quot;') + '">' : '')
         + '<small>' + esc(brand) + '</small><h1>' + esc(title) + '</h1><p>' + esc(lead) + '</p><ol>' + points.map(x => '<li>' + esc(x) + '</li>').join('') + '</ol>' + (foot ? '<footer>' + esc(foot) + '</footer>' : ''));
       await wait(500);
     },

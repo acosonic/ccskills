@@ -1,17 +1,34 @@
 #!/usr/bin/env python3
-"""One narration clip per scene with OpenAI text-to-speech.
+"""One narration clip per scene with OpenAI or Google Cloud text-to-speech.
 
   OPENAI_API_KEY=... tts.py <set> [--voice onyx] [--dir .]
+  GOOGLE_TTS_API_KEY=... tts.py <set> --voice sr-RS-Chirp3-HD-Fenrir     (a voice named <ll-CC>-… goes to Google)
   OPENAI_API_KEY=... tts.py --samples "One sentence to compare." --lang sr onyx ash echo cedar ballad verse
+  GOOGLE_TTS_API_KEY=... tts.py --google-voices sr-RS            (lists Google's voices for a language)
+  GOOGLE_TTS_API_KEY=... tts.py --samples "Реченица." sr-RS-Chirp3-HD-Fenrir sr-RS-Chirp3-HD-Orus
 
 Reads <dir>/voice/narration.json ({"<set>": {"<scene>": "<text>", ...}}) and <dir>/voice/style.json
 ({"sr": "...", "en": "..."}; the set name's last two letters pick the language). Writes voice/<set>/NN.mp3 and
 voice/<set>/durations.json (scene -> file, seconds), which the recording uses to pace each scene.
 The key is read from the environment only and never printed.
 """
-import argparse, json, os, subprocess, sys, urllib.request, urllib.error
+import argparse, base64, json, os, re, subprocess, sys, urllib.request, urllib.error
+
+def google(voice):
+    return re.match(r'^[a-z]{2,3}-[A-Z]{2}-', voice) is not None
 
 def speak(text, voice, style, out):
+    if google(voice):   # Google Cloud TTS (Chirp 3 HD, Standard…): no style instructions, the voice name carries the language
+        req = urllib.request.Request('https://texttospeech.googleapis.com/v1/text:synthesize', method='POST',
+            headers={'X-Goog-Api-Key': os.environ['GOOGLE_TTS_API_KEY'], 'Content-Type': 'application/json'},
+            data=json.dumps({'input': {'text': text}, 'voice': {'languageCode': voice[:voice.index('-', 3)], 'name': voice},
+                             'audioConfig': {'audioEncoding': 'MP3', 'sampleRateHertz': 24000}}).encode())
+        try:
+            with urllib.request.urlopen(req, timeout=180) as r, open(out, 'wb') as f:
+                f.write(base64.b64decode(json.load(r)['audioContent']))
+        except urllib.error.HTTPError as e:
+            sys.exit('HTTP %s from Google TTS for %s: %s' % (e.code, out, e.read()[:300].decode(errors='replace')))
+        return
     req = urllib.request.Request('https://api.openai.com/v1/audio/speech', method='POST',
         headers={'Authorization': 'Bearer ' + os.environ['OPENAI_API_KEY'], 'Content-Type': 'application/json'},
         data=json.dumps({'model': 'gpt-4o-mini-tts', 'voice': voice, 'input': text, 'instructions': style, 'response_format': 'mp3'}).encode())
@@ -26,16 +43,24 @@ def seconds(path):
 
 p = argparse.ArgumentParser()
 p.add_argument('names', nargs='*'); p.add_argument('--voice', default='onyx'); p.add_argument('--dir', default='.')
-p.add_argument('--samples'); p.add_argument('--lang', default='en')
+p.add_argument('--samples'); p.add_argument('--lang', default='en'); p.add_argument('--google-voices', metavar='ll-CC')
 a = p.parse_args()
-if 'OPENAI_API_KEY' not in os.environ: sys.exit('set OPENAI_API_KEY')
+if a.google_voices:
+    req = urllib.request.Request('https://texttospeech.googleapis.com/v1/voices?languageCode=' + a.google_voices,
+                                 headers={'X-Goog-Api-Key': os.environ.get('GOOGLE_TTS_API_KEY', '')})
+    for v in sorted(json.load(urllib.request.urlopen(req, timeout=60)).get('voices', []), key=lambda v: v['name']):
+        if a.google_voices in v['languageCodes']: print(v['name'], v['ssmlGender'])
+    sys.exit()
+for v in (a.names if a.samples else [a.voice]):
+    need = 'GOOGLE_TTS_API_KEY' if google(v) else 'OPENAI_API_KEY'
+    if need not in os.environ: sys.exit('set ' + need)
 voice_dir = os.path.join(a.dir, 'voice')
 styles = json.load(open(os.path.join(voice_dir, 'style.json'), encoding='utf-8'))
 
 if a.samples:
     os.makedirs(os.path.join(voice_dir, 'samples'), exist_ok=True)
     for v in a.names:
-        speak(a.samples, v, styles[a.lang], os.path.join(voice_dir, 'samples', v + '.mp3')); print(v, 'ok')
+        speak(a.samples, v, styles.get(a.lang, ''), os.path.join(voice_dir, 'samples', v + '.mp3')); print(v, 'ok')
     sys.exit()
 
 narration = json.load(open(os.path.join(voice_dir, 'narration.json'), encoding='utf-8'))
