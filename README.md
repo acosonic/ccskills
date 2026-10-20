@@ -9,13 +9,14 @@ A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sl
 | [server-upgrade.md](server-upgrade.md) | Upgrades Ubuntu servers to the latest LTS release, disables unnecessary services, and hardens the firewall |
 | [redmine.md](redmine.md) | Administers a Redmine instance on Ubuntu with Phusion Passenger |
 | [cakephp2-security-analysis.md](cakephp2-security-analysis.md) | Comprehensive security audit for CakePHP 2.x applications |
+| [cakephp2-deep-audit.md](cakephp2-deep-audit.md) | Deeper CakePHP 2.x audit with concrete patterns from real-world findings (statična Security.salt, AutoLogin cookie, XXE, weak tokens) — outputs `security_nalaz.md` with P0–P3 priority report |
 | [omv.md](omv.md) | Manages an OpenMediaVault server via SSH |
 | [wayland-detect.md](wayland-detect.md) | Auto-detects Wayland sessions for Lazarus/Qt5 applications |
 | [qt5-to-qt6-wayland.md](qt5-to-qt6-wayland.md) | Qt5 to Qt6 migration with native Wayland support |
 | [grub-hidpi-font.md](grub-hidpi-font.md) | Fix unreadable GRUB menu font on HiDPI/4K displays |
 | [server-audit.md](server-audit.md) | Comprehensive server security audit after suspected compromise or spam attack |
 | [vmware-esxi.md](vmware-esxi.md) | Manage VMware ESXi host over SSH — VM lifecycle, datastores, ghettoVCB backups, NVMe/cloud-init recovery |
-| [corp-webapp/](corp-webapp/SKILL.md) | House standard for internal Laravel web apps: ready starter with shadcn-style Bootstrap theme (light/dark, generic "Generic Corp" branding), Active Directory login + AD user import, mandatory driver.js tutorial, modals/side sheets, sortable tables, collapsible cards, CARTO maps, Docker + Caddy https. Patterns: preview for every file type (.doc → PDF via LibreOffice, Outlook .msg and ZIP in pure PHP), in-app approval/signature instead of "I agree" e-mails, admin SMTP settings, Word documents filled from the organisation's own templates |
+| [corp-webapp/](corp-webapp/SKILL.md) | House standard for internal Laravel web apps: ready starter with shadcn-style Bootstrap theme (light/dark, generic "Generic Corp" branding), Active Directory login + AD user import, mandatory driver.js tutorial, modals/side sheets, sortable tables, collapsible cards, CARTO maps, Docker + Caddy https. Patterns: preview for every file type (.doc → PDF via LibreOffice, Outlook .msg and ZIP in pure PHP), in-app approval/signature instead of "I agree" e-mails, admin SMTP settings, Word documents filled from the organisation's own templates. Optional module: AI assistant as an agent (Claude + tools over the app's data with the user's permissions, changes only after the user confirms, public website assistant) — `scripts/add-ai-agent.sh` |
 | [demo-video/](demo-video/SKILL.md) | Narrated demo video of a web app: Playwright walks through the real application, a text-to-speech narrator explains each scene, title cards open and close it (what it is, what you will see, recap), quiet music ducks under the voice. Scenes are paced to the voice clips; scripts for speech, music, mixing and for checking audio you cannot hear |
 
 ## References
@@ -44,6 +45,7 @@ Claude Code picks them up automatically when the task matches the skill descript
 /server-upgrade user@your-server-ip
 /redmine
 /cakephp2-security-analysis
+/cakephp2-deep-audit
 /omv user@server-ip
 /wayland-detect
 /qt5-to-qt6-wayland
