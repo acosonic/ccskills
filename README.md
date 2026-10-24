@@ -21,6 +21,7 @@ A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sl
 | [mi-smart-clock-hass-kiosk.md](mi-smart-clock-hass-kiosk.md) | Convert Xiaomi Mi Smart Clock (X04G) into a Home Assistant kiosk — backup, bootloader unlock, LineageOS 20 GSI flash, Fully Kiosk + Cyrillic dashboard |
 | [lineageos-install.md](lineageos-install.md) | Generic LineageOS install playbook for any supported phone/tablet — pre-flight, bootloader unlock, recovery flash, ROM + GApps/microG sideload, common gotchas |
 | [web-credential-vault.md](web-credential-vault.md) | Playbook for client-side encrypted credential storage in PHP+JS: bcrypt auth, AES-256-GCM vault, PBKDF2, roles, audit log, global rekey, and the five pitfalls we hit in production |
+| [webapp-passkey.md](webapp-passkey.md) | Add passwordless **passkey / WebAuthn** login (Face ID, Touch ID, Windows Hello, phone) to a Laravel app so users skip TOTP. laragear/webauthn v5 recipe (eloquent-webauthn driver, trait, published migration), passwordless login that bypasses the password→TOTP flow, resident/userless keys, /passkeys enrol+delete, @laragear/webpass JS. Keeps password+TOTP as fallback. Nine production pitfalls: domain/RP-ID churn, CF-proxy vs IP allowlist, port in origins, missing namespace imports (unlogged 500), CSRF-exempt ceremonies, is_active callback |
 
 ## References
 
@@ -58,4 +59,5 @@ Claude Code picks them up automatically when the task matches the skill descript
 /mi-smart-clock-hass-kiosk
 /lineageos-install
 /web-credential-vault
+/webapp-passkey
 ```
