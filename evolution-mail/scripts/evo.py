@@ -240,7 +240,7 @@ def cmd_extract(a):
         with open(dest, "wb") as fh:
             fh.write(data)
         print(f"{dest}\t{p.get_content_type()}\t{len(data)} B")
-        if a.unzip and zipfile.is_zipfile(dest):
+        if a.unzip and dest.lower().endswith(".zip") and zipfile.is_zipfile(dest):
             zdir = os.path.splitext(dest)[0]
             os.makedirs(zdir, exist_ok=True)
             with zipfile.ZipFile(dest) as z:
