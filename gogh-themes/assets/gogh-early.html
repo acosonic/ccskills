@@ -1,0 +1,21 @@
+<!-- Inline this in <head>, BEFORE the stylesheet link and before any deferred script.
+     It applies the stored scheme synchronously so the first paint already has it
+     (no flash of the default palette). Keep PREFIX / DARK in step with configure(). -->
+<script>
+(function () {
+  var PREFIX = 'gogh', DARK = 'dark';
+  try {
+    var h = document.documentElement, id = localStorage.getItem(PREFIX + '-scheme');
+    if (!id) return;
+    h.setAttribute('data-scheme', id);
+    if (id === 'gogh') {
+      var g = JSON.parse(localStorage.getItem(PREFIX + '-scheme-gogh'));
+      for (var k in g.vars) h.style.setProperty(k, g.vars[k]);
+      if (DARK) h.classList.toggle(DARK, !!g.dark);
+    }
+    // Curated schemes: the app's own dark-mode init must already have set the class
+    // (apply() keeps the app's dark-mode storage key in step). If the app has no
+    // persisted dark mode, store the variant and toggle it here instead.
+  } catch (e) {}
+}());
+</script>

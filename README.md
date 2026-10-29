@@ -23,6 +23,7 @@ A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sl
 | [web-credential-vault.md](web-credential-vault.md) | Playbook for client-side encrypted credential storage in PHP+JS: bcrypt auth, AES-256-GCM vault, PBKDF2, roles, audit log, global rekey, and the five pitfalls we hit in production |
 | [webapp-passkey.md](webapp-passkey.md) | Add passwordless **passkey / WebAuthn** login (Face ID, Touch ID, Windows Hello, phone) to a Laravel app so users skip TOTP. laragear/webauthn v5 recipe (eloquent-webauthn driver, trait, published migration), passwordless login that bypasses the password→TOTP flow, resident/userless keys, /passkeys enrol+delete, @laragear/webpass JS. Keeps password+TOTP as fallback. Nine production pitfalls: domain/RP-ID churn, CF-proxy vs IP allowlist, port in origins, missing namespace imports (unlogged 500), CSRF-exempt ceremonies, is_active callback |
 | [evolution-mail/](evolution-mail/SKILL.md) | Read, search and answer mail in GNOME Evolution straight from its local cache (Exchange/EWS, IMAP, local): list/search messages, show bodies, extract attachments (ZIPs with non-ASCII names), turn PDF/DOC/DOCX/XLSX into text for review, cross-check e-mailed contracts and tender documents, and reply through a pre-filled Evolution composer (To/Cc, body, attachments, In-Reply-To threading) that the user sends with one click |
+| [gogh-themes/](gogh-themes/SKILL.md) | Add selectable colour schemes from [Gogh](https://github.com/Gogh-Co/Gogh) (~1,250 terminal palettes: Dracula, Nord, Gruvbox, Catppuccin, Solarized…) to any web app — curated WCAG-AA contrast-checked list plus in-browser search over every palette with accent choice, no flash on load, default look pixel-identical. Generator (Python), dependency-free runtime + picker (JS/CSS), puppeteer leak and contrast checks |
 
 ## References
 
@@ -39,7 +40,7 @@ Copy any `.md` skill file to `~/.claude/commands/` and invoke it with `/<skill-n
 Folder skills (with `SKILL.md`, scripts and templates, e.g. `corp-webapp/`, `demo-video/`) go to `~/.claude/skills/`:
 
 ```bash
-cp -r corp-webapp demo-video evolution-mail ~/.claude/skills/
+cp -r corp-webapp demo-video evolution-mail gogh-themes ~/.claude/skills/
 ```
 
 Claude Code picks them up automatically when the task matches the skill description (or call `/corp-webapp`).

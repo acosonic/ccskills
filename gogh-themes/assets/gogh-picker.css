@@ -1,0 +1,32 @@
+/* gogh-picker.css — styles for renderPicker() / renderRecent(). Uses the app tokens from
+   gogh-derive.css (rename --app-* to the app's own). Buttons are explicitly sized: many
+   frameworks/legacy CSS set `button { height: … }`, which collapses the cards. */
+.gs-picker { display: flex; flex-direction: column; gap: .5rem; }
+.gs-group { margin-top: .5rem; font-size: .75rem; font-weight: 600; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--app-text-subtle); }
+.gs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: .5rem; }
+.gs-card { height: auto; margin: 0; display: flex; flex-direction: column; gap: 6px; padding: 6px;
+  background: var(--app-surface); border: 1px solid var(--app-border); border-radius: .5rem;
+  color: var(--app-text); font: inherit; font-size: .75rem; text-align: left; cursor: pointer; }
+.gs-card:hover { border-color: var(--app-primary); }
+.gs-card[aria-checked="true"] { border-color: var(--app-primary); font-weight: 600;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-primary) 35%, transparent); }
+.gs-preview { display: flex; flex-direction: column; gap: 4px; height: 46px; padding: 7px 8px;
+  border-radius: .25rem; background: var(--p-bg); }
+.gs-preview i { display: block; height: 5px; border-radius: 3px; background: var(--p-fg); opacity: .85; }
+.gs-preview i:nth-child(1) { width: 70%; }
+.gs-preview i:nth-child(2) { width: 45%; opacity: .5; }
+.gs-preview i:nth-child(3) { width: 30%; height: 9px; margin-top: auto; background: var(--p-accent); opacity: 1; }
+.gs-recent { display: flex; gap: .5rem; padding: .25rem 0; }
+.gs-dot { width: 28px; height: 28px; min-width: 28px; padding: 0; margin: 0; border-radius: 50%;
+  border: 1px solid var(--app-border-2); cursor: pointer; }
+.gs-dot:hover { transform: scale(1.1); }
+.gs-dot[aria-checked="true"] { box-shadow: 0 0 0 2px var(--app-surface), 0 0 0 4px var(--app-primary); }
+.gs-any { margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--app-border); }
+.gs-search { width: 100%; max-width: 420px; height: 32px; box-sizing: border-box; padding: 0 .5rem;
+  background: var(--app-surface); color: var(--app-text); border: 1px solid var(--app-border-2); border-radius: .375rem; }
+.gs-search:focus { outline: none; border-color: var(--app-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-primary) 35%, transparent); }
+.gs-current:not([hidden]) { margin-bottom: .75rem; }
+.gs-title { font-weight: 600; color: var(--app-text); }
+.gs-hint { margin: .25rem 0; font-size: .75rem; color: var(--app-text-muted); }
